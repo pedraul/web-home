@@ -1,0 +1,105 @@
+{% extends "services/base.html" %}
+{% block title %}About — {{ site_settings.company_name }}{% endblock %}
+{% block content %}
+<section class="band about-hero">
+  <div class="wrap about-hero-grid">
+    <div class="about-heading">
+      <span class="eyebrow">About {{ site_settings.company_name }}</span>
+      <h1>Simple access.<br>Focused expertise.</h1>
+      <p>{{ site_settings.about_intro }}</p>
+    </div>
+    {% if services %}
+    <div class="about-index" aria-label="Explore our services">
+      <span class="about-index-label">Explore our services</span>
+      <div class="flow">
+        {% for s in services %}<a href="#svc-{{ s.slug }}"><span class="dot" style="background:{{ s.color }}"></span>{{ s.name }}</a>{% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="band about-story">
+  <div class="wrap about-story-grid">
+    <div class="story-heading">
+      <span class="eyebrow">Our story</span>
+      <h2>{{ site_settings.about_heading }}</h2>
+    </div>
+    <div class="prose story-body">
+      {{ site_settings.about_body|linebreaks }}
+    </div>
+  </div>
+</section>
+
+<section class="band about-numbers">
+  <div class="wrap">
+    <span class="eyebrow">At a glance</span>
+    <div class="stats about-stats">
+      <div class="stat"><b>{{ live_count }}</b><span>live service{{ live_count|pluralize }}</span></div>
+      <div class="stat"><b>{{ area_count }}</b><span>service area{{ area_count|pluralize }}</span></div>
+      <div class="stat"><b>1</b><span>portal to remember</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band about-principles">
+  <div class="wrap">
+    <div class="section-heading">
+      <span class="eyebrow">How we work</span>
+      <h2>Built around real people and practical needs.</h2>
+    </div>
+    <div class="principle-grid">
+      <article class="principle">
+        <span class="principle-num">01</span>
+        <h3>Stay focused</h3>
+        <p>Each service is designed around one clear job, so it stays useful and easy to understand.</p>
+      </article>
+      <article class="principle">
+        <span class="principle-num">02</span>
+        <h3>Make it accessible</h3>
+        <p>One familiar portal brings every service together without extra software or confusion.</p>
+      </article>
+      <article class="principle">
+        <span class="principle-num">03</span>
+        <h3>Keep moving</h3>
+        <p>We combine clear tools, dependable support and direct links to help you move forward.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+{% if services %}
+<section class="band about-services">
+  <div class="wrap">
+    <div class="section-heading">
+      <span class="eyebrow">Our services</span>
+      <h2>What we offer</h2>
+      <p>Explore our focused tools and find the help you need.</p>
+    </div>
+    <ol class="offer-list">
+      {% for s in services %}
+      <li class="offer" id="svc-{{ s.slug }}">
+        <span class="offer-num">{{ forloop.counter|stringformat:"02d" }}</span>
+        {% if s.image %}<img class="offer-img" src="{{ s.image.url }}" alt="">{% else %}<div class="mono" style="background:{{ s.color }}" aria-hidden="true">{{ s.initials }}</div>{% endif %}
+        <div class="offer-body">
+          <h3>{{ s.name }}</h3>
+          <span class="pill">{{ s.category }}</span>
+          <p>{{ s.description }}</p>
+        </div>
+        <a class="btn ghost" href="{{ s.url }}" target="_blank" rel="noopener noreferrer">Visit <span aria-hidden="true">↗</span><span class="sr"> {{ s.name }} (opens in a new tab)</span></a>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+{% endif %}
+
+<section class="band about-cta-band">
+  <div class="wrap cta about-cta">
+    <span class="eyebrow">Start a conversation</span>
+    <h2>Want to work with us?</h2>
+    <p>Ask about a service, suggest a new one, or talk to us about a partnership.</p>
+    <a class="btn" href="{% url 'contact' %}">Contact us <span aria-hidden="true">→</span></a>
+  </div>
+</section>
+{% endblock %}

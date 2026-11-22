@@ -1,0 +1,100 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{{ site_settings.meta_description }}">
+  <title>{% block title %}{{ site_settings.company_name }}{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="{% static 'img/favicon.png' %}" type="image/png">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+</head>
+<body id="top">
+  {% with current=request.resolver_match.url_name %}
+  <nav class="top" aria-label="Main navigation"><div class="wrap">
+    <a class="brand" href="{% url 'home' %}">{% include "services/_logo.html" %}</a>
+    <div class="links">
+      <a href="{% url 'home' %}"{% if current == 'home' %} aria-current="page"{% endif %}>Home</a>
+      <a href="{% url 'about' %}"{% if current == 'about' %} aria-current="page"{% endif %}>About</a>
+      <a href="{% url 'contact' %}"{% if current == 'contact' %} aria-current="page"{% endif %}>Contact</a>
+      <a href="{% url 'support' %}"{% if current == 'support' %} aria-current="page"{% endif %}>Support</a>
+      {% if user.is_staff %}
+      <a href="{% url 'dashboard' %}" class="adm"{% if current == 'dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
+      {% else %}
+      <a href="{% url 'dashboard_login' %}" class="adm"{% if current == 'dashboard_login' %} aria-current="page"{% endif %}>Admin login</a>
+      {% endif %}
+    </div>
+  </div></nav>
+  {% endwith %}
+
+  <main>{% block content %}{% endblock %}</main>
+
+  <footer class="site-footer">
+    <div class="foot-accent" aria-hidden="true"></div>
+    <div class="wrap foot-grid">
+      <div class="foot-about">
+        <a class="brand" href="{% url 'home' %}">{% include "services/_logo.html" %}</a>
+        <p>{{ site_settings.about_intro }}</p>
+        {% with socials=site_settings.social_links %}{% if socials %}
+        <ul class="socials" aria-label="Follow us">
+          {% for s in socials %}
+          <li><a class="social {{ s.key }}" href="{{ s.url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ s.label }} (opens in a new tab)" title="{{ s.label }}">{% include "services/_icon.html" with name=s.key %}</a></li>
+          {% endfor %}
+        </ul>
+        {% endif %}{% endwith %}
+      </div>
+
+      <nav aria-labelledby="foot-services">
+        <h2 id="foot-services">Services</h2>
+        <ul>
+          {% for s in footer_services %}<li><a href="{{ s.url }}" target="_blank" rel="noopener noreferrer">{{ s.name }}</a></li>{% empty %}<li class="muted">Coming soon</li>{% endfor %}
+        </ul>
+      </nav>
+
+      <nav aria-labelledby="foot-company">
+        <h2 id="foot-company">Company</h2>
+        <ul>
+          <li><a href="{% url 'home' %}">Home</a></li>
+          <li><a href="{% url 'about' %}">About us</a></li>
+          <li><a href="{% url 'contact' %}">Contact</a></li>
+          <li><a href="{% url 'support' %}">Support &amp; FAQ</a></li>
+        </ul>
+      </nav>
+
+      <div>
+        <h2>Get in touch</h2>
+        <ul class="foot-contact">
+          <li>{% include "services/_icon.html" with name="mail" %}<a href="mailto:{{ site_settings.contact_email }}">{{ site_settings.contact_email }}</a></li>
+          {% if site_settings.contact_phone %}<li>{% include "services/_icon.html" with name="phone" %}<a href="tel:{{ site_settings.contact_phone|cut:' ' }}">{{ site_settings.contact_phone }}</a></li>{% endif %}
+          {% if site_settings.office_address %}<li>{% include "services/_icon.html" with name="pin" %}<span>{{ site_settings.office_address }}</span></li>{% endif %}
+          {% if site_settings.office_hours %}<li>{% include "services/_icon.html" with name="clock" %}<span>{{ site_settings.office_hours }}</span></li>{% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="wrap foot-bottom">
+      <span>© {% now "Y" %} {{ site_settings.company_name }}. All rights reserved.</span>
+      <span class="foot-bottom-links">
+        <a href="{% url 'dashboard' %}">Staff login</a>
+        <a href="#top" class="to-top">Back to top {% include "services/_icon.html" with name="arrow-up" %}</a>
+      </span>
+    </div>
+  </footer>
+
+  {% if messages %}
+  <div class="toast-host">
+    {% for message in messages %}
+    <div class="toast" role="status" data-toast>
+      <span>{{ message }}</span>
+      {% if 'undo' in message.tags %}
+      <form method="post" action="{% url 'service_undo' %}">{% csrf_token %}<button type="submit">Undo</button></form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <script src="{% static 'js/portal.js' %}" defer></script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{% extends "services/base.html" %}
+{% block title %}Support — {{ site_settings.company_name }}{% endblock %}
+{% block content %}
+<section class="band"><div class="wrap two">
+  <div>
+    <h1>Support</h1>
+    <p>{{ site_settings.support_intro }}</p>
+    <h3 class="mt">Service status</h3>
+    <ul class="status-list">
+      {% for s in services %}
+      <li><a href="{{ s.url }}" target="_blank" rel="noopener noreferrer">{{ s.name }}</a><span class="status {{ s.status }}">{{ s.get_status_display }}</span></li>
+      {% empty %}
+      <li class="note">No services are published yet.</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div>
+    <h2>Common questions</h2>
+    {% for faq in faqs %}
+    <details{% if forloop.first %} open{% endif %}><summary>{{ faq.question }}</summary>{{ faq.answer|linebreaks }}</details>
+    {% empty %}
+    <p class="note">No questions yet. <a href="{% url 'contact' %}">Contact us</a> and we’ll help.</p>
+    {% endfor %}
+    <p class="mt">Still stuck? <a href="{% url 'contact' %}">Send us a message</a>.</p>
+  </div>
+</div></section>
+{% endblock %}

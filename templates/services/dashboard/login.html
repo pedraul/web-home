@@ -1,0 +1,24 @@
+{% extends "services/base.html" %}
+{% block title %}Admin login — {{ site_settings.company_name }}{% endblock %}
+{% block content %}
+<section class="band"><div class="wrap two">
+  <div>
+    <h1>Admin login</h1>
+    <p>Sign in to add, edit, publish or remove services.</p>
+    <p class="note">Only staff accounts can sign in. Create one with <code>python manage.py createsuperuser</code>.</p>
+  </div>
+  <form method="post" class="panel" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    {% for error in form.non_field_errors %}<div class="err block">{{ error }}</div>{% endfor %}
+    {% for field in form %}
+    <div class="row">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% for error in field.errors %}<div class="err">{{ error }}</div>{% endfor %}
+    </div>
+    {% endfor %}
+    <button class="btn wide" type="submit">Sign in</button>
+  </form>
+</div></section>
+{% endblock %}

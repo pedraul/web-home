@@ -1,0 +1,68 @@
+{% extends "services/base.html" %}
+{% load static %}
+{% block content %}
+<h1 class="sr">{{ site_settings.company_name }}</h1>
+
+<section class="slider" aria-roledescription="carousel" aria-label="Highlights" data-slider>
+  {% for slide in slides %}
+  <figure class="slide{% if forloop.first %} is-active{% endif %}" aria-roledescription="slide" aria-label="{{ forloop.counter }} of {{ slides|length }}">
+    <img src="{% if slide.image %}{{ slide.image.url }}{% else %}{% static slide.art %}{% endif %}" alt=""{% if not forloop.first %} loading="lazy"{% endif %}>
+    <figcaption class="slide-text">
+      <h2>{{ slide.title }}</h2>
+      {% if slide.caption %}<p>{{ slide.caption }}</p>{% endif %}
+      <a class="btn light" href="#services">Explore services <span aria-hidden="true">↓</span></a>
+    </figcaption>
+  </figure>
+  {% empty %}
+  <figure class="slide is-active">
+    <img src="{% static 'img/slide-1.svg' %}" alt="">
+    <figcaption class="slide-text">
+      <h2>{{ site_settings.company_name }}</h2>
+      <a class="btn light" href="#services">Explore services <span aria-hidden="true">↓</span></a>
+    </figcaption>
+  </figure>
+  {% endfor %}
+  {% if slides|length > 1 %}
+  <div class="dots">
+    {% for slide in slides %}<button type="button" aria-label="Show slide {{ forloop.counter }}: {{ slide.title }}"{% if forloop.first %} aria-current="true"{% endif %}></button>{% endfor %}
+  </div>
+  {% endif %}
+</section>
+
+{% with lines=site_settings.ticker_lines %}{% if lines %}
+<div class="marquee">
+  <p class="sr">{{ lines|join:". " }}</p>
+  <div class="marquee-track" aria-hidden="true">
+    {% for copy in "12" %}<div class="marquee-group">{% for rep in "123" %}{% for line in lines %}<span>{{ line }}</span><svg class="spark" viewBox="0 0 24 24"><path d="M12 0c.8 6.5 4.7 10.9 12 12-7.3 1.1-11.2 5.5-12 12-.8-6.5-4.7-10.9-12-12C7.3 10.9 11.2 6.5 12 0Z"/></svg>{% endfor %}{% endfor %}</div>{% endfor %}
+  </div>
+</div>
+{% endif %}{% endwith %}
+
+{% if services %}
+<div class="marquee reverse" aria-hidden="true">
+  <div class="marquee-track">
+    {% for copy in "12" %}<div class="marquee-group">{% for rep in "123456" %}{% for s in services %}<span>{{ s.name }}</span><i>↗</i>{% endfor %}{% endfor %}</div>{% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<section class="band" id="services"><div class="wrap">
+  <h2>Our services</h2>
+  <div class="grid">
+    {% for s in services %}
+    <article class="svc{% if s.image %} has-img{% endif %}">
+      {% if s.image %}<img class="svc-img" src="{{ s.image.url }}" alt="" loading="lazy">{% endif %}
+      <div class="hd">
+        <div class="mono" style="background:{{ s.color }}" aria-hidden="true">{{ s.initials }}</div>
+        <div><h3>{{ s.name }}</h3><div class="cat">{{ s.category }}</div></div>
+      </div>
+      <p>{{ s.description }}</p>
+      <div class="url">{{ s.display_url }}</div>
+      <a class="btn" href="{{ s.url }}" target="_blank" rel="noopener noreferrer">Open service <span aria-hidden="true">↗</span><span class="sr"> {{ s.name }} (opens in a new tab)</span></a>
+    </article>
+    {% empty %}
+    <div class="empty">No services are published yet. Check back soon.</div>
+    {% endfor %}
+  </div>
+</div></section>
+{% endblock %}

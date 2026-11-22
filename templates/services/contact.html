@@ -1,0 +1,73 @@
+{% extends "services/base.html" %}
+{% block title %}Contact — {{ site_settings.company_name }}{% endblock %}
+{% block content %}
+<section class="band contact-hero">
+  <div class="wrap contact-hero-grid">
+    <div class="contact-heading">
+      <span class="eyebrow">Let’s talk</span>
+      <h1>How can we help?</h1>
+      <p>{{ site_settings.contact_intro }}</p>
+    </div>
+
+    <div class="contact-aside" aria-label="Response commitment">
+      <span class="contact-aside-mark" aria-hidden="true">↗</span>
+      <p>We typically reply</p>
+      <strong>within one working day</strong>
+    </div>
+  </div>
+</section>
+
+<section class="band contact-main">
+  <div class="wrap contact-layout">
+    <div class="contact-info" aria-label="Contact information">
+      <div class="contact-info-heading">
+        <span class="eyebrow">Direct contacts</span>
+        <h2>Find the right way to reach us.</h2>
+      </div>
+
+      <a class="contact-card" href="mailto:{{ site_settings.contact_email }}">
+        <span class="contact-card-icon">{% include "services/_icon.html" with name="mail" %}</span>
+        <span><small>Email us</small><strong>{{ site_settings.contact_email }}</strong></span>
+        <span class="contact-card-arrow" aria-hidden="true">→</span>
+      </a>
+
+      {% if site_settings.contact_phone %}
+      <a class="contact-card" href="tel:{{ site_settings.contact_phone|cut:' ' }}">
+        <span class="contact-card-icon">{% include "services/_icon.html" with name="phone" %}</span>
+        <span><small>Call us</small><strong>{{ site_settings.contact_phone }}</strong></span>
+        <span class="contact-card-arrow" aria-hidden="true">→</span>
+      </a>
+      {% endif %}
+
+      {% if site_settings.office_address %}
+      <div class="contact-card">
+        <span class="contact-card-icon">{% include "services/_icon.html" with name="pin" %}</span>
+        <span><small>Visit our office</small><strong>{{ site_settings.office_address }}</strong></span>
+      </div>
+      {% endif %}
+
+      {% if site_settings.office_hours %}
+      <div class="contact-card">
+        <span class="contact-card-icon">{% include "services/_icon.html" with name="clock" %}</span>
+        <span><small>Office hours</small><strong>{{ site_settings.office_hours }}</strong></span>
+      </div>
+      {% endif %}
+    </div>
+
+    <aside class="contact-options panel" aria-label="Other ways to get help">
+      <span class="eyebrow">Before you reach out</span>
+      <h2>Choose the fastest help for your question.</h2>
+      <div class="contact-option-list">
+        <a href="{% url 'support' %}">
+          <span><small>Quick answers</small><strong>Visit our support centre</strong></span>
+          <span aria-hidden="true">→</span>
+        </a>
+        <a href="{% url 'home' %}#services">
+          <span><small>Product help</small><strong>Find the right service</strong></span>
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

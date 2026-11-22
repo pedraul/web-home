@@ -1,0 +1,1 @@
+{% load static %}{% if site_settings.logo %}<img class="logo-img" src="{{ site_settings.logo.url }}" alt="{{ site_settings.company_name }}">{% else %}<img class="logo-mark" src="{% static 'img/muzira-mark.png' %}" alt="" width="670" height="320"><span class="wordmark"><span class="wm-name">MUZIRA</span><span class="wm-sub">CONSULTANCY LTD</span></span>{% endif %}

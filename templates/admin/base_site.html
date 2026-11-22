@@ -1,0 +1,34 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block title %}{{ title }} | Muzira Administration{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/custom.css' %}">
+{% endblock %}
+
+{% block branding %}
+<div id="site-name">
+  <a href="{% url 'admin:index' %}" class="admin-brand">
+    <span class="admin-brand-mark" aria-hidden="true">M</span>
+    <span>Muzira <small>Administration</small></span>
+  </a>
+</div>
+{% endblock %}
+
+{% block nav-global %}
+{% if available_apps %}
+<nav class="admin-top-nav" aria-label="Administration sections">
+  {% for app in available_apps %}
+  {% for model in app.models %}
+  {% if model.admin_url %}
+  <a href="{{ model.admin_url }}">{{ model.name }}</a>
+  {% endif %}
+  {% endfor %}
+  {% endfor %}
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}

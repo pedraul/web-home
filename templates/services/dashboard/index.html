@@ -1,0 +1,85 @@
+{% extends "services/base.html" %}
+{% block title %}Service dashboard — {{ site_settings.company_name }}{% endblock %}
+{% block content %}
+<section class="band"><div class="wrap">
+  <div class="section-head">
+    <h1>Service dashboard</h1>
+    <div class="acts">
+      <a class="btn ghost" href="{% url 'admin:index' %}">Site settings</a>
+      <form method="post" action="{% url 'service_reset' %}" data-confirm="Replace every service with the sample data? This can’t be undone.">{% csrf_token %}<button class="btn ghost" type="submit">Reset sample data</button></form>
+      <form method="post" action="{% url 'dashboard_logout' %}">{% csrf_token %}<button class="btn ghost" type="submit">Sign out</button></form>
+    </div>
+  </div>
+
+  <div class="stats dash-stats">
+    <div class="stat"><b>{{ services|length }}</b><span>total services</span></div>
+    <div class="stat"><b>{{ published_count }}</b><span>published</span></div>
+    <div class="stat"><b>{{ draft_count }}</b><span>draft{{ draft_count|pluralize }}</span></div>
+    <a class="stat" href="{% url 'admin:services_contactmessage_changelist' %}?is_handled__exact=0"><b>{{ new_message_count }}</b><span>new message{{ new_message_count|pluralize }} →</span></a>
+  </div>
+
+  <div class="two dash">
+    <div class="panel card">
+      <h2>Services</h2>
+      <div class="scroll"><table class="stack">
+        <thead><tr><th>Service</th><th>Category</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for s in services %}
+        <tr{% if editing.pk == s.pk %} class="is-editing"{% endif %}>
+          <td data-l="Service"><div class="svc-cell">
+            {% if s.image %}<img class="thumb" src="{{ s.image.url }}" alt="">{% else %}<div class="mono sm" style="background:{{ s.color }}" aria-hidden="true">{{ s.initials }}</div>{% endif %}
+            <div><b>{{ s.name }}</b><div class="url">{{ s.url }}</div></div>
+          </div></td>
+          <td data-l="Category">{{ s.category }}</td>
+          <td data-l="Status">
+            <form method="post" action="{% url 'service_toggle' s.pk %}">{% csrf_token %}
+              <button class="status {% if s.is_published %}on{% else %}off{% endif %}" type="submit" title="Click to {% if s.is_published %}move to drafts{% else %}publish{% endif %}">{% if s.is_published %}Published{% else %}Draft{% endif %}</button>
+            </form>
+          </td>
+          <td data-l="Actions"><div class="acts">
+            <a class="btn ghost sm" href="?edit={{ s.pk }}#svcForm">Edit</a>
+            <form method="post" action="{% url 'service_delete' s.pk %}">{% csrf_token %}<button class="btn danger sm" type="submit">Delete</button></form>
+          </div></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="empty">No services yet. Add your first one.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table></div>
+    </div>
+
+    <form method="post" class="panel" id="svcForm" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      <h2>{% if editing %}Edit service{% else %}Add a service{% endif %}</h2>
+      {% for error in form.non_field_errors %}<div class="err block">{{ error }}</div>{% endfor %}
+
+      {% for field in form %}
+        {% if field.name == "color" %}
+        <div class="row">
+          <span class="label">{{ field.label }}</span>
+          <div class="chips swatches">
+            {% for value, label in field.field.choices %}
+            <label class="swatch" style="--sw:{{ value }}"><input type="radio" name="color" value="{{ value }}"{% if field.value == value %} checked{% endif %}><span class="sr">{{ label }}</span></label>
+            {% endfor %}
+          </div>
+        </div>
+        {% elif field.name == "is_published" %}
+        <div class="row check">{{ field }}<label for="{{ field.id_for_label }}">Publish on the portal</label></div>
+        {% else %}
+        <div class="row">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for error in field.errors %}<div class="err">{{ error }}</div>{% endfor %}
+        </div>
+        {% endif %}
+      {% endfor %}
+      <datalist id="catList">{% for c in category_options %}<option value="{{ c }}">{% endfor %}</datalist>
+
+      <div class="acts">
+        <button class="btn" type="submit">{% if editing %}Save changes{% else %}Add service{% endif %}</button>
+        {% if editing %}<a class="btn ghost" href="{% url 'dashboard' %}">Cancel</a>{% endif %}
+      </div>
+    </form>
+  </div>
+</div></section>
+{% endblock %}

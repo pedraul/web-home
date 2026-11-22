@@ -1,0 +1,28 @@
+{% load i18n %}
+<nav id="nav-sidebar" aria-label="{% translate 'Main navigation' %}">
+  <div class="main">
+    {% for app in available_apps %}
+    <section class="module app-{{ app.app_label }}-module">
+      <h2>
+        {% if app.app_label == "services" %}Website
+        {% elif app.app_label == "auth" %}Accounts
+        {% else %}{{ app.name }}{% endif %}
+      </h2>
+      <ul>
+        {% for model in app.models %}
+        <li>
+          {% if model.admin_url %}
+          <a href="{{ model.admin_url }}">{{ model.name }}</a>
+          {% else %}
+          <span>{{ model.name }}</span>
+          {% endif %}
+          {% if model.add_url %}
+          <a class="nav-add-link" href="{{ model.add_url }}" aria-label="{% blocktranslate with name=model.name %}Add {{ name }}{% endblocktranslate %}">+</a>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endfor %}
+  </div>
+</nav>

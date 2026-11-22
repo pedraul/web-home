@@ -1,0 +1,88 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block nav-breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <div class="admin-welcome">
+    <div>
+      <span class="admin-kicker">Workspace</span>
+      <h1>Welcome back</h1>
+      <p>Manage the website, services and customer enquiries.</p>
+    </div>
+    <div class="admin-welcome-actions">
+      <span class="admin-current-user">{{ user.get_short_name|default:user.get_username }}</span>
+      <a class="admin-view-site" href="{% url 'home' %}" target="_blank" rel="noopener noreferrer">
+        View website <span aria-hidden="true">↗</span>
+      </a>
+    </div>
+  </div>
+
+  {% if app_list %}
+  <div class="admin-app-grid">
+    {% for app in app_list %}
+    <section class="admin-app-card">
+      <div class="admin-app-heading">
+        <span class="admin-app-icon" aria-hidden="true">
+          {% if app.app_label == "services" %}S{% elif app.app_label == "auth" %}A{% else %}{{ app.name|first|upper }}{% endif %}
+        </span>
+        <div>
+          <span class="admin-app-label">Management</span>
+          <h2>{{ app.name }}</h2>
+        </div>
+      </div>
+      <ul class="admin-model-list">
+        {% for model in app.models %}
+        <li>
+          <div class="admin-model-name">
+            {% if model.admin_url %}
+            <a href="{{ model.admin_url }}">{{ model.name }}</a>
+            {% else %}<span>{{ model.name }}</span>{% endif %}
+            <small>{% if model.add_url %}Create and manage{% else %}View records{% endif %}</small>
+          </div>
+          <span class="admin-model-actions">
+            {% if model.add_url %}<a class="admin-action-add" href="{{ model.add_url }}" title="{% blocktranslate with name=model.name %}Add {{ name }}{% endblocktranslate %}">+ Add</a>{% endif %}
+            {% if model.admin_url %}<a class="admin-action-manage" href="{{ model.admin_url }}" title="{% blocktranslate with name=model.name %}Change {{ name }}{% endblocktranslate %}">Manage <span aria-hidden="true">→</span></a>{% endif %}
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p>{% translate "You don’t have permission to view or edit anything." %}</p>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block sidebar %}
+{% if not is_popup %}
+<div id="content-related">
+  <div class="module recent-actions-module">
+    <h2>{% translate 'Recent actions' %}</h2>
+    {% load log %}
+    {% get_admin_log 8 as admin_log for_user user %}
+    {% if not admin_log %}
+    <p>{% translate 'No recent actions.' %}</p>
+    {% else %}
+    <ul class="actionlist">
+      {% for entry in admin_log %}
+      <li class="{% if entry.is_addition %}addlink{% elif entry.is_change %}changelink{% elif entry.is_deletion %}deletelink{% endif %}">
+        {% if entry.is_deletion or not entry.get_admin_url %}
+        <span>{{ entry.object_repr }}</span>
+        {% else %}
+        <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+        {% endif %}
+        <small>{{ entry.content_type.name|title }}</small>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}
