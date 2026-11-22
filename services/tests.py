@@ -3,6 +3,7 @@ import tempfile
 
 from django.contrib.auth import get_user_model
 from django.contrib import admin
+from django.contrib.admin.models import ADDITION, CHANGE, LogEntry
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
@@ -161,6 +162,14 @@ class DashboardTests(TestCase):
         service = Service.objects.get(name="Payroll")
         self.assertEqual(service.slug, "payroll")
         self.assertEqual(service.display_order, 8)
+        entry = LogEntry.objects.get(object_id=str(service.pk))
+        self.assertEqual(entry.action_flag, ADDITION)
+        self.staff.is_superuser = True
+        self.staff.save(update_fields=["is_superuser"])
+        self.assertContains(
+            self.client.get(reverse("admin:services_service_history", args=[service.pk])),
+            "Added from the service dashboard.",
+        )
 
     def test_add_service_with_image(self):
         self.login()
@@ -168,14 +177,16 @@ class DashboardTests(TestCase):
             buf = io.BytesIO()
             Image.new("RGB", (32, 18), "#b8f5d0").save(buf, "PNG")
             upload = SimpleUploadedFile("tile.png", buf.getvalue(), content_type="image/png")
-            self.client.post("/dashboard/", {
+            response = self.client.post("/dashboard/", {
                 "name": "Gallery", "category": "Media", "description": "Photos.",
                 "url": "https://gallery.example.com", "color": "#ffd66b", "status": "online",
                 "is_published": "on", "image": upload,
-            })
+            }, follow=True)
             service = Service.objects.get(name="Gallery")
             self.assertTrue(service.image.name.startswith("services/tile"))
+            self.assertTrue(service.image.url.startswith("/media/"))
             self.assertContains(self.client.get("/"), service.image.url)
+            self.assertContains(response, f'src="{service.image.url}"')
 
     def test_add_service_rejects_non_http_url(self):
         self.login()
@@ -195,6 +206,8 @@ class DashboardTests(TestCase):
         })
         s.refresh_from_db()
         self.assertEqual(s.name, "Bookings Pro")
+        entry = LogEntry.objects.filter(object_id=str(s.pk)).latest("action_time")
+        self.assertEqual(entry.action_flag, CHANGE)
 
     def test_toggle_publish(self):
         self.login()

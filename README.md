@@ -22,6 +22,8 @@ python manage.py runserver
 
 Uploaded images are stored in `media/`. Slides without a photo use the built-in illustrations in `static/img/`.
 
+On PythonAnywhere, add a static-files mapping in the Web tab with URL `/media/` and the full filesystem path to this project's `media/` directory. Keep that directory on persistent storage; uploaded files are not included in Git.
+
 Sign in to the dashboard with a staff account's email (or username) and password.
 
 ## Notes

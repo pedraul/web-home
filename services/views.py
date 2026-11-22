@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.admin.models import ADDITION, CHANGE, DELETION, LogEntry
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import views as auth_views
 from django.core.mail import EmailMessage
@@ -17,6 +18,16 @@ UNDO_FIELDS = ("name", "slug", "category", "description", "url", "color", "statu
 
 
 BUILTIN_SLIDE_ART = ["img/slide-1.svg", "img/slide-2.svg", "img/slide-3.svg"]
+
+
+def _log_service_action(request, service, action_flag, change_message):
+    LogEntry.objects.log_actions(
+        user_id=request.user.pk,
+        queryset=[service],
+        action_flag=action_flag,
+        change_message=change_message,
+        single_object=True,
+    )
 
 
 def _categories(services):
@@ -85,6 +96,9 @@ def dashboard(request):
     form = ServiceForm(request.POST or None, request.FILES or None, instance=editing)
     if request.method == "POST" and form.is_valid():
         service = form.save()
+        action_flag = CHANGE if editing else ADDITION
+        action = "Changed" if editing else "Added"
+        _log_service_action(request, service, action_flag, f"{action} from the service dashboard.")
         if editing:
             messages.success(request, f"Saved {service.name}")
         else:
@@ -111,6 +125,8 @@ def toggle_service(request, pk):
     service = get_object_or_404(Service, pk=pk)
     service.is_published = not service.is_published
     service.save(update_fields=["is_published"])
+    status = "Published" if service.is_published else "Moved to drafts"
+    _log_service_action(request, service, CHANGE, f"{status} from the service dashboard.")
     messages.success(request, f"{service.name} {'published' if service.is_published else 'moved to drafts'}")
     return redirect("dashboard")
 
@@ -120,6 +136,7 @@ def toggle_service(request, pk):
 def delete_service(request, pk):
     service = get_object_or_404(Service, pk=pk)
     request.session[UNDO_KEY] = {f: getattr(service, f) for f in UNDO_FIELDS} | {"image": service.image.name}
+    _log_service_action(request, service, DELETION, "Deleted from the service dashboard.")
     service.delete()
     messages.success(request, f"Deleted {service.name}", extra_tags="undo")
     return redirect("dashboard")
@@ -133,6 +150,7 @@ def undo_delete(request):
         if Service.objects.filter(slug=data["slug"]).exists():
             data["slug"] = ""
         service = Service.objects.create(**data)
+        _log_service_action(request, service, ADDITION, "Restored from the service dashboard.")
         messages.success(request, f"Restored {service.name}")
     return redirect("dashboard")
 
