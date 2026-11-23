@@ -2,6 +2,8 @@ from django.core.validators import URLValidator
 from django.db import models
 from django.utils.text import slugify
 
+from .images import to_webp
+
 
 TILE_COLORS = [
     ("#b8f5d0", "Mint"),
@@ -12,6 +14,15 @@ TILE_COLORS = [
     ("#ffc89e", "Peach"),
     ("#c9f0ff", "Ice"),
 ]
+
+
+def optimize_new_upload(field, kind):
+    """Convert a freshly uploaded picture to a resized WebP before it is stored."""
+    if field and not field._committed:
+        try:
+            to_webp(field, kind)
+        except ValueError:
+            pass  # keep the original file if Pillow cannot convert it
 
 
 class SiteSettings(models.Model):
@@ -90,6 +101,10 @@ class SiteSettings(models.Model):
     def __str__(self):
         return f"Website content — {self.company_name}"
 
+    def save(self, *args, **kwargs):
+        optimize_new_upload(self.logo, "logo")
+        super().save(*args, **kwargs)
+
     @property
     def initials(self):
         return initials(self.company_name)
@@ -134,6 +149,10 @@ class HeroSlide(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        optimize_new_upload(self.image, "slide")
+        super().save(*args, **kwargs)
 
 
 def initials(name):
@@ -182,6 +201,7 @@ class Service(models.Model):
             while Service.objects.filter(slug=slug).exclude(pk=self.pk).exists():
                 slug, n = f"{base}-{n}", n + 1
             self.slug = slug
+        optimize_new_upload(self.image, "service")
         super().save(*args, **kwargs)
 
 

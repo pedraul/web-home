@@ -240,3 +240,49 @@ class DashboardTests(TestCase):
         self.assertTrue(Service.objects.filter(pk=s.pk).exists())
         self.login()
         self.assertEqual(self.client.get(reverse("service_delete", args=[s.pk])).status_code, 405)
+
+
+class WebImageTests(TestCase):
+    def setUp(self):
+        import tempfile
+        self.media = tempfile.mkdtemp()
+        self.override = self.settings(MEDIA_ROOT=self.media)
+        self.override.enable()
+
+    def tearDown(self):
+        import shutil
+        self.override.disable()
+        shutil.rmtree(self.media, ignore_errors=True)
+
+    def _png(self, size=(3000, 1500)):
+        from io import BytesIO
+        from PIL import Image
+        buf = BytesIO()
+        Image.new("RGB", size, "red").save(buf, "PNG")
+        return buf.getvalue()
+
+    def test_new_upload_is_stored_as_resized_webp(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image
+        s = Service.objects.create(
+            name="Pics", description="d", url="https://x.example",
+            image=SimpleUploadedFile("big.png", self._png(), content_type="image/png"),
+        )
+        self.assertTrue(s.image.name.endswith(".webp"))
+        with Image.open(s.image.path) as img:
+            self.assertEqual(img.format, "WEBP")
+            self.assertEqual(max(img.size), 1000)
+
+    def test_optimize_images_command_converts_existing_files(self):
+        from django.core.files.base import ContentFile
+        from django.core.management import call_command
+        from io import StringIO
+        s = Service.objects.create(name="Old", description="d", url="https://x.example")
+        s.image.storage.save("services/old.png", ContentFile(self._png()))
+        Service.objects.filter(pk=s.pk).update(image="services/old.png")
+        out = StringIO()
+        call_command("optimize_images", stdout=out)
+        s.refresh_from_db()
+        self.assertEqual(s.image.name, "services/old.webp")
+        self.assertFalse(s.image.storage.exists("services/old.png"))
+        self.assertIn("1 converted", out.getvalue())
