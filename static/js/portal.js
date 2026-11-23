@@ -37,6 +37,15 @@
     f.addEventListener("submit", (e) => { if (!confirm(f.dataset.confirm)) e.preventDefault(); });
   }
 
+  // Top-bar Services menu: close on outside click or Escape.
+  const navMenu = document.querySelector("[data-nav-menu]");
+  if (navMenu) {
+    document.addEventListener("click", (e) => { if (!navMenu.contains(e.target)) navMenu.open = false; });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && navMenu.open) { navMenu.open = false; navMenu.querySelector("summary").focus(); }
+    });
+  }
+
   // Toasts fade after a few seconds.
   for (const t of document.querySelectorAll("[data-toast]")) {
     setTimeout(() => t.remove(), 6000);

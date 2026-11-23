@@ -19,6 +19,19 @@
       <a href="{% url 'home' %}"{% if current == 'home' %} aria-current="page"{% endif %}>Home</a>
       <a href="{% url 'about' %}"{% if current == 'about' %} aria-current="page"{% endif %}>About</a>
       <a href="{% url 'contact' %}"{% if current == 'contact' %} aria-current="page"{% endif %}>Contact</a>
+      <details class="nav-menu" data-nav-menu>
+        <summary>Services <span aria-hidden="true">▾</span></summary>
+        <div class="nav-menu-list">
+          {% for s in footer_services %}
+          <a href="{{ s.url }}" target="_blank" rel="noopener noreferrer">{{ s.name }} <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a>
+          {% empty %}
+          <span class="nav-menu-empty">Coming soon</span>
+          {% endfor %}
+          {% if user.is_staff %}
+          <a class="nav-menu-add" href="{% url 'dashboard' %}#svcForm">+ Add service</a>
+          {% endif %}
+        </div>
+      </details>
       <a href="{% url 'support' %}"{% if current == 'support' %} aria-current="page"{% endif %}>Support</a>
       {% if user.is_staff %}
       <a href="{% url 'dashboard' %}" class="adm"{% if current == 'dashboard' %} aria-current="page"{% endif %}>Dashboard</a>

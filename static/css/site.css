@@ -427,6 +427,69 @@ nav .wrap {
   color: var(--accentInk);
 }
 
+/* Services dropdown in the top bar */
+.nav-menu {
+  position: relative;
+}
+
+.nav-menu summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 500;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.nav-menu summary:hover,
+.nav-menu[open] summary {
+  background: var(--soft);
+}
+
+.nav-menu-list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 50;
+  min-width: 220px;
+  max-width: min(320px, calc(100vw - 32px));
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 6px;
+  display: grid;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgb(0 0 0 / .14);
+}
+
+.links .nav-menu-list a {
+  min-height: 40px;
+  padding: 8px 10px;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.links .nav-menu-list a.nav-menu-add {
+  margin-top: 4px;
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 8px 8px;
+  font-weight: 600;
+}
+
+.nav-menu-empty {
+  padding: 8px 10px;
+  color: var(--mute);
+}
+
 /* Hero */
 .hero {
   background: var(--field);
@@ -1607,7 +1670,17 @@ details p {
 
 @media (max-width: 520px) {
   .foot-grid {
-    grid-template-columns: minmax(0, 1fr);
+    gap: 28px 20px;
+  }
+  /* "Get in touch" holds long emails and addresses, so it gets the full row. */
+  .foot-grid > :last-child {
+    grid-column: 1 / -1;
+  }
+  .site-footer h2 {
+    margin-bottom: 14px;
+  }
+  .site-footer nav a {
+    overflow-wrap: anywhere;
   }
   .foot-bottom {
     flex-direction: column;
@@ -1665,8 +1738,16 @@ details p {
     margin-left: 0;
     width: 100%;
   }
-  .links a {
+  .links a,
+  .nav-menu summary {
     padding: 8px 10px;
+  }
+  .nav-menu-list {
+    position: fixed;
+    top: auto;
+    left: 16px;
+    right: 16px;
+    max-width: none;
   }
   .stack thead {
     display: none;
