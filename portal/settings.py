@@ -1,10 +1,16 @@
+import os
 from pathlib import Path
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-prototype-key-change-before-deployment"
-DEBUG = True
+# On the server, set DJANGO_SECRET_KEY (in the WSGI file and the virtualenv's
+# postactivate). Locally, a development key is used when it is not set.
+_secret_key = os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY = _secret_key or "django-insecure-prototype-key-change-before-deployment"
+# Debug is off wherever a real secret key is set (i.e. on the server), unless
+# DJANGO_DEBUG=1 is set explicitly.
+DEBUG = os.environ.get("DJANGO_DEBUG", "0" if _secret_key else "1") == "1"
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".pythonanywhere.com"]
 
 INSTALLED_APPS = [
